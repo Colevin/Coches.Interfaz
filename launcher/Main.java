@@ -8,6 +8,8 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.SwingUtilities;
+
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
@@ -34,6 +36,7 @@ import simulator.model.DequeuingStrategy;
 import simulator.model.Event;
 import simulator.model.LightSwitchingStrategy;
 import simulator.model.TrafficSimulator;
+import simulator.view.MainWindow;
 
 public class Main {
 
@@ -42,6 +45,7 @@ public class Main {
 	private static String _outFile = null;
 	private static Factory<Event> _eventsFactory = null;
 	private static Integer _steps;
+	private static String mode = null;
 
 	private static void parseArgs(String[] args) {
 
@@ -55,9 +59,11 @@ public class Main {
 		try {
 			CommandLine line = parser.parse(cmdLineOptions, args);
 			parseHelpOption(line, cmdLineOptions);
+			parseModeOption(line);
 			parseInFileOption(line);
 			parseOutFileOption(line);
 			parseTicksOption(line);
+			
 
 			// if there are some remaining arguments, then something wrong is
 			// provided in the command line!
@@ -83,8 +89,8 @@ public class Main {
 		cmdLineOptions.addOption(Option.builder("i").longOpt("input").hasArg().desc("Events input file").build());
 		cmdLineOptions.addOption(Option.builder("o").longOpt("output").hasArg().desc("Output file, where reports are written.").build());
 		cmdLineOptions.addOption(Option.builder("h").longOpt("help").desc("Print this message").build());
-		cmdLineOptions.addOption(Option.builder("t").longOpt("ticks").hasArg().desc("Ticks to the simulator�s main loop (default value is 10)").build());
-
+		cmdLineOptions.addOption(Option.builder("t").longOpt("ticks").hasArg().desc("Ticks to the simulatorï¿½s main loop (default value is 10)").build());
+		cmdLineOptions.addOption(Option.builder("m").longOpt("mode").hasArg().desc("Execution Mode. Possible values: 'batch' (Batch mode), 'gui' (Graphical User Interface mode)). Default value: 'batch'").build());
 		return cmdLineOptions;
 	}
 
@@ -98,8 +104,8 @@ public class Main {
 
 	private static void parseInFileOption(CommandLine line) throws ParseException {
 		_inFile = line.getOptionValue("i");
-		if (_inFile == null) {
-			throw new ParseException("An events file is missing");
+		if (mode.equals("batch") && _inFile == null) {
+			throw new ParseException("An input file of bodies is required");
 		}
 	}
 
@@ -114,6 +120,9 @@ public class Main {
 		else {
 			_steps = _timeLimitDefaultValue;
 		}
+	}
+	private static void parseModeOption(CommandLine line) throws ParseException {
+			mode = line.getOptionValue("m");
 	}
 
 	private static void initFactories() {
@@ -154,20 +163,46 @@ public class Main {
         c.loadEvents(is);
         c.run(_steps, os);
 } 
-
-	private static void start(String[] args) throws IOException {
-		initFactories();
-		parseArgs(args);
-		startBatchMode();
-	}
-
 	// example command lines:
 	//
 	// -i resources/examples/ex1.json
 	// -i resources/examples/ex1.json -t 300
 	// -i resources/examples/ex1.json -o resources/tmp/ex1.out.json
 	// --help
-
+	private static void startGUIMode() throws Exception {
+		//Tiene valor -i y carga el archivo en el simulador
+		if(_inFile != null){
+			InputStream is = new FileInputStream (_inFile);
+			TrafficSimulator ts = new TrafficSimulator();
+			Controller ctrl = new Controller(ts, _eventsFactory);
+			ctrl.loadEvents(is);
+			SwingUtilities.invokeAndWait(new Runnable() {
+				public void run() {
+					new MainWindow(ctrl);
+				}
+			});
+		}
+		//No tiene valor -i y carga el simulador vac�o
+		else{
+			TrafficSimulator ts = new TrafficSimulator();
+			Controller ctrl = new Controller(ts, _eventsFactory);
+			SwingUtilities.invokeAndWait(new Runnable() {
+				public void run() {
+					new MainWindow(ctrl);
+				}
+			});
+		}
+	}
+	private static void start(String[] args) throws Exception {
+		initFactories();
+		parseArgs(args);
+		if(mode.equals("gui")){
+			startGUIMode();
+		}
+		else{
+			startBatchMode();
+		}
+	}
 	public static void main(String[] args) {
 		try {
 			start(args);

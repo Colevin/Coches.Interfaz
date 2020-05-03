@@ -6,6 +6,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.List;
 
+import javax.swing.AbstractButton;
 import javax.swing.Box;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -15,8 +16,10 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSpinner;
+import javax.swing.JTextArea;
 import javax.swing.JToolBar;
 import javax.swing.SpinnerNumberModel;
+import javax.swing.SwingUtilities;
 
 import org.json.JSONObject;
 
@@ -26,8 +29,8 @@ import simulator.model.RoadMap;
 import simulator.model.TrafficSimObserver;
 
 public class ControlPanel extends JPanel implements TrafficSimObserver {
-	private Controller ctrl;
-	private boolean stop;
+	private Controller _ctrl;
+	private boolean _stopped;
 
 	// Componentes
 	private JToolBar toolBar;
@@ -38,13 +41,14 @@ public class ControlPanel extends JPanel implements TrafficSimObserver {
 	private JButton stopButton;
 	private JLabel ticksLabel;
 	private JSpinner ticksSpinner;
-	
+	private JTextArea dtSelector;
+
 	private JButton exitButton;
 
 	ControlPanel(Controller ctrl) {
 		super(new BorderLayout());
-		this.ctrl = ctrl;
-		stop = true;
+		this._ctrl = ctrl;
+		_stopped = true;
 		initGui();
 		ctrl.addObserver(this);
 	}
@@ -57,7 +61,7 @@ public class ControlPanel extends JPanel implements TrafficSimObserver {
 		this.toolBar = new JToolBar();
 		this.add(toolBar, BorderLayout.PAGE_START);
 
-		// Archivos
+		// Archivos _________________________________________________
 		this.loadButton = new JButton();
 		loadButton.setActionCommand("load");
 		loadButton.setToolTipText("Load the file");
@@ -67,13 +71,12 @@ public class ControlPanel extends JPanel implements TrafficSimObserver {
 				JFileChooser fileSelector = new JFileChooser();
 				int choice = fileSelector.showOpenDialog(loadButton);
 				if (choice == JFileChooser.APPROVE_OPTION) {
-					ctrl.reset();
+					_ctrl.reset();
 				}
 				// Excepcioones
 			}
 		});
-		
-		
+		//CO2 CLASS BUTTON ________________________________________
 		this.co2ClassButton = new JButton();
 		co2ClassButton.setActionCommand("change cont class");
 		co2ClassButton.setToolTipText("change to different contamination class");
@@ -84,6 +87,7 @@ public class ControlPanel extends JPanel implements TrafficSimObserver {
 
 			}
 		});
+		//WEATHER BUTTON ________________________________________
 		this.weatherButton = new JButton();
 		weatherButton.setActionCommand("change weather of the road");
 		weatherButton.setToolTipText("change to different weather");
@@ -94,22 +98,48 @@ public class ControlPanel extends JPanel implements TrafficSimObserver {
 
 			}
 		});
-		//RUN BUTTON 
-		
-		
-		
-		
-		//______________________________
+		//run BUTTON ____________________________________________
+		this.runButton = new JButton();
+		runButton.setActionCommand("play");
+		runButton.setToolTipText("Start the simulation");
+		runButton.setIcon(new ImageIcon("resources/icons/run.png"));
+		runButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				shutDownButtons();
+				_stopped = false;
+			try {
+				double dt = Double.parseDouble(dtSelector.getText());
+				if(dt>0) {
+					int steps = Integer.parseInt(ticksSpinner.getValue().toString());
+					run_sim(steps);	
+				}
+				else {
+					JOptionPane.showMessageDialog(toolBar, "Delta-Time value must be Positive", "Error in Delta-Time Selector", JOptionPane.ERROR_MESSAGE);
+					//ESTO HAY QUE VERLO
+					turnUpButtons();
+					_stopped = true;
+				}
+			}
+				catch(NumberFormatException nfe) {
+					JOptionPane.showMessageDialog(toolBar, nfe.getMessage(), "Error in Delta-Time Selector", JOptionPane.ERROR_MESSAGE);
+					//ESTO HAY QUE VERLO
+					turnUpButtons();
+					_stopped = true;
+				}	
+			}
+		});
+
+		//STOP BUTTON    ________________________________________________
 		this.stopButton = new JButton();
 		stopButton.setActionCommand("stop");
 		stopButton.setToolTipText("Stop the simulation");
 		stopButton.setIcon(new ImageIcon("resources/icons/stop.png"));
 		stopButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				stop = true;
+				_stopped = false;
 			}
 		});
-
+		//EXIT BUTTON ________________________________________
 		this.exitButton = new JButton();
 		exitButton.setAlignmentX(JButton.RIGHT_ALIGNMENT);
 		exitButton.setActionCommand("exit");
@@ -126,14 +156,13 @@ public class ControlPanel extends JPanel implements TrafficSimObserver {
 				}
 			}
 		});
-		
+		//TICKS SPINNER BUTTON ________________________________________
 		this.ticksLabel = new JLabel("Ticks: ");
-		SpinnerNumberModel stepsSpinnerModel = new SpinnerNumberModel(0,0,1000000,500);
+		SpinnerNumberModel stepsSpinnerModel = new SpinnerNumberModel(0, 0, 1000000, 500);
 		this.ticksSpinner = new JSpinner(stepsSpinnerModel);
-		this.ticksSpinner.setPreferredSize(new Dimension(65,30)); //ESTA POR VER
-		this.ticksSpinner.setMaximumSize(new Dimension(65,30)); 
-		
-		
+		this.ticksSpinner.setPreferredSize(new Dimension(65, 30)); // ESTA POR VER
+		this.ticksSpinner.setMaximumSize(new Dimension(65, 30));
+		//TOOLBAR BUTTON ________________________________________
 		toolBar.add(this.loadButton);
 		toolBar.addSeparator();
 		toolBar.add(this.co2ClassButton);
@@ -149,6 +178,35 @@ public class ControlPanel extends JPanel implements TrafficSimObserver {
 		toolBar.add(Box.createHorizontalGlue());
 		toolBar.add(this.exitButton);
 	}
+
+	private void run_sim(int n) {
+		if (n > 0 && !_stopped) {
+			try {
+				_ctrl.run(1, null); //cambiar
+				
+			} catch (Exception e) {
+				JOptionPane.showMessageDialog(this.toolBar, e.getMessage(), "Error in Simulator", JOptionPane.ERROR_MESSAGE);
+				_stopped = true;
+				this.turnUpButtons();
+				return;
+			}
+			SwingUtilities.invokeLater(() -> run_sim(n - 1));
+		} else {
+			enableToolBar(true);
+			_stopped = true;
+			this.turnUpButtons();
+		}
+	}
+
+	private void enableToolBar(boolean b) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	private void stop() {
+		_stopped = true;
+	}
+
 
 	private void shutDownButtons() {
 		this.stopButton.setEnabled(true);

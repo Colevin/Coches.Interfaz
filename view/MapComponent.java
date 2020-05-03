@@ -90,7 +90,7 @@ public class MapComponent extends JPanel implements TrafficSimObserver {
 			// choose a color for the road depending on the total contamination, the darker
 			// the
 			// more contaminated (wrt its co2 limit)
-			int roadColorValue = 200 - (int) (200.0 * Math.min(1.0, (double) r.getTotalCO2() / (1.0 + (double) r.getCO2Limit())));
+			int roadColorValue = 200 - (int) (200.0 * Math.min(1.0, (double) r.getTotalCO2() / (1.0 + (double) r.getContLimit())));
 			Color roadColor = new Color(roadColorValue, roadColorValue, roadColorValue);
 
 			// draw line from (x1,y1) to (x2,y2) with arrow of color arrowColor and line of
@@ -101,7 +101,7 @@ public class MapComponent extends JPanel implements TrafficSimObserver {
 	}
 
 	private void drawVehicles(Graphics g) {
-		for (Vehicle v : _map.getVehilces()) {
+		for (Vehicle v : _map.getVehicles()) {
 			if (v.getStatus() != VehicleStatus.ARRIVED) {
 
 				// The calculation below compute the coordinate (vX,vY) of the vehicle on the

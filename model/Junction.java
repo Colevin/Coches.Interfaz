@@ -1,5 +1,6 @@
 package simulator.model;
 
+import java.awt.RenderingHints;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -62,7 +63,7 @@ public class Junction extends SimulatedObject {
 	}
 
 	void addIncommingRoad(Road r) {
-		if (r.getSrcJunc() == this) {
+		if (r.getSrc() == this) {
 			throw new srcDesJunNotSameException("The junction of arrival and destination are not the same");
 		} else {
 			listIncRoad.add(r);
@@ -74,7 +75,7 @@ public class Junction extends SimulatedObject {
 	}
 
 	void addOutGoingRoad(Road r) {
-		if (r.getDestJunc() == this) {
+		if (r.getDest() == this) {
 			throw new srcDesJunNotSameException("The junction of arrival and destination not the same");
 		}
 		/*
@@ -82,7 +83,7 @@ public class Junction extends SimulatedObject {
 		 * IllegalArgumentException("The junction of arrival is not empty"); }
 		 */
 		else {
-			mapOutgoing.put(r.getDestJunc(), r);
+			mapOutgoing.put(r.getDest(), r);
 		}
 
 	}
@@ -158,5 +159,37 @@ public class Junction extends SimulatedObject {
 
 	public boolean hasOutgoing() {
 		return this.mapOutgoing.size() > 0;
+	}
+	public int getX() {
+		return this.x;
+	}
+	public int getY() {
+		return this.y;
+	}
+	public String displayQueue() {
+		String output = null;
+		for(Road r :this.listIncRoad) {
+			int counter = 0;
+			output += r.getId() + ": [ " ;
+			List<Vehicle> roadQue = roadMap.get(r);
+			for(Vehicle v : roadQue) {
+				if(counter < roadQue.size()-1) {
+					output += v.getId() + ",";
+					counter++;
+				}
+				else {
+					output += v.getId() + "]";
+				}
+			}	
+		}
+		return output;
+	}
+	
+	public int getGreenLightIndex() {
+		return this.greenIndex;
+	}
+
+	public List<Road> getInRoads() {
+		return this.listIncRoad;
 	}
 }

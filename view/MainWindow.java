@@ -2,11 +2,14 @@ package simulator.view;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.GridLayout;
 
+import javax.swing.BoxLayout;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JTable;
 
 import simulator.control.Controller;
 
@@ -32,18 +35,46 @@ public class MainWindow extends JFrame {
 		JPanel mapsPanel = new JPanel();
 		mapsPanel.setLayout(new BoxLayout(mapsPanel, BoxLayout.Y_AXIS));
 		viewsPanel.add(mapsPanel);
-//tables
+		//tables
 		JPanel eventsView = createViewPanel(new JTable(new EventsTableModel(_ctrl)), "Events");
 		eventsView.setPreferredSize(new Dimension(500, 200));
 		tablesPanel.add(eventsView);
-//TODO add other tables
-//...
-//maps
+		//VEHICLE TABLE_________________
+		
+		JPanel vehicleView = createViewPanel(new JTable(new VehiclesTableModel(_ctrl)), "Events");
+		eventsView.setPreferredSize(new Dimension(500, 200));
+		tablesPanel.add(vehicleView);
+		
+		
+		//ROAD TABLE_________________
+		
+		JPanel roadView = createViewPanel(new JTable(new RoadsTableModel(_ctrl)), "Events");
+		eventsView.setPreferredSize(new Dimension(500, 200));
+		tablesPanel.add(roadView);
+		
+		//JUNCTION TABLE_________________
+		
+		JPanel junctionView = createViewPanel(new JTable(new JunctionsTableModel(_ctrl)), "Events");
+		eventsView.setPreferredSize(new Dimension(500, 200));
+		tablesPanel.add(junctionView);
+		
+	
+		
+		
+		
+		
+		//MAP DEL PROFE 
 		JPanel mapView = createViewPanel(new MapComponent(_ctrl), "Map");
 		mapView.setPreferredSize(new Dimension(500, 400));
 		mapsPanel.add(mapView);
-//TODO add a map for MapByRoadComponent
-//...
+		
+		//MAPBYROAD------------------
+		
+		JPanel mapView2 = createViewPanel(new MapByRoadComponent(_ctrl), "Map");
+		mapView2.setPreferredSize(new Dimension(500, 400));
+		mapsPanel.add(mapView2);
+		
+		
 		this.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
 		this.pack();
 		this.setVisible(true);

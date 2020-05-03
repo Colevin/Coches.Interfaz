@@ -1,5 +1,6 @@
 package simulator.model;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -18,6 +19,7 @@ public class TrafficSimulator implements Observable<TrafficSimObserver>{
 		this.time = 0;
 		this.listEvent = new SortedArrayList<>();
 		this.roadMap = new RoadMap();
+		this.trafficSimList = new ArrayList<>();
 	}
 
 	public void addEvent(Event e) {
@@ -76,5 +78,11 @@ public class TrafficSimulator implements Observable<TrafficSimObserver>{
 	}
 	public List<Vehicle> getVehicles() {
 		return roadMap.getVehicles();
+	}
+	public List<Road> getRoads(){
+		return roadMap.getRoads();
+	}
+	public int getTicks() {
+		return this.time;
 	}
 }

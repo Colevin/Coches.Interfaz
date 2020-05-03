@@ -6,6 +6,7 @@ import java.awt.FlowLayout;
 import java.awt.Frame;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.JButton;
@@ -18,7 +19,9 @@ import javax.swing.JTextArea;
 import javax.swing.SpinnerNumberModel;
 
 import simulator.control.Controller;
+import simulator.misc.Pair;
 import simulator.model.Event;
+import simulator.model.NewSetContClassEvent;
 import simulator.model.RoadMap;
 import simulator.model.TrafficSimObserver;
 import simulator.model.Vehicle;
@@ -40,6 +43,10 @@ public class ChangeCO2ClassDialog extends JDialog{
 	private JLabel CO2;
 	private JLabel ticks;
 	private JSpinner tickSpin;
+	private String idVehicle;
+	private int newContClass;
+	private int whatTime;
+	private Event newEvent;
 	
 	private JComboBox<String> listVehicles;
 	
@@ -69,24 +76,28 @@ public class ChangeCO2ClassDialog extends JDialog{
 		
 		this.Vehicles = new JLabel("Vehicles: ");
 		this.listVehicles = new JComboBox<String>(vehiclesRoad); 
-		listCO.setSelectedIndex(0);
-		listCO.addActionListener((ActionListener) this);
+		listVehicles.setSelectedIndex(0);
+		listVehicles.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				idVehicle = listVehicles.getSelectedItem().toString();
+			}	
+		});
 		
 		
 		this.CO2 = new JLabel("CO2 Class: ");
 		this.listCO = new JComboBox<Integer>(Co2Pos); 
 		listCO.setSelectedIndex(0);
-		listCO.addActionListener((ActionListener) this);
+		listCO.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				newContClass = Integer.valueOf(listCO.getSelectedItem().toString());	
+			}	
+		});
+		
 		
 		
 		//Ticks
 		this.ticks = new JLabel("Ticks: ");
 		this.tickSpin = new JSpinner();
-		
-	
-		
-		
-		
 		
 		
 		//Buttons Panel
@@ -107,11 +118,16 @@ public class ChangeCO2ClassDialog extends JDialog{
 		buttonsPanel.add(cancelButton);
 		JButton OKButton = new JButton("OK");
 		OKButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				status = 1;
-				ChangeCO2ClassDialog.this.setVisible(false);
-			}
-		});
+				public void actionPerformed(ActionEvent e) {
+					List<Pair<String, Integer>> ws = new ArrayList<>();
+					Pair<String, Integer> theEvent = new Pair<>(idVehicle, newContClass);
+					ws.add(theEvent);
+					status = 1;
+					whatTime = controller.getTicks() + Integer.parseInt(tickSpin.getValue().toString());
+					controller.addEvent(new NewSetContClassEvent(whatTime, ws));
+					ChangeCO2ClassDialog.this.setVisible(false);
+				}
+			});
 		buttonsPanel.add(OKButton);
 
 		mainPanel.add(buttonsPanel, BorderLayout.PAGE_END);

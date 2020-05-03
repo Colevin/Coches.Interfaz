@@ -25,9 +25,9 @@ public class NewSetContClassEvent extends Event{
 		else throw new IllegalArgumentException("The contamination class is empty");
 	}
 	public String toString() {
-		for(Pair<String,Integer> pair: cs) {
-		return "New ContClass '"+ pair.getFirst() + pair.getSecond() + "'";
-		}
+		//for(Pair<String,Integer> pair: cs) {
+		return "New ContClass '" ;//+ pair.getFirst() + pair.getSecond() + "'";
+		//}
 	}
 	
 }

@@ -91,14 +91,29 @@ public abstract class Road extends SimulatedObject {
 			rep.put("id", this._id);
 			return rep;
 	}
-	public Junction getDestJunc() {
+	public Junction getDest() {
 		return this.destJunc;
 	}
 	public int roadLenght() {
 		return this.length;
 	}
-	public Junction getSrcJunc() {
+	public Weather getWeather() {
+		return this.weather;
+	}
+	public int getMaxSpeed() {
+		return this.maxSpeed;
+	}
+	public Junction getSrc() {
 		return this.srcJunc;
+	}
+	public double getTotalCO2() {
+		return this.totalCont;
+	}
+	public double getContLimit() {
+		return this.contLimit;
+	}
+	public double getLength() {
+		return this.length;
 	}
 
 }
