@@ -97,9 +97,9 @@ public class ControlPanel extends JPanel implements TrafficSimObserver {
 		co2ClassButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				JFrame co2dialog = new JFrame();
+				_stopped = true;
+				turnUpButtons();
 				ChangeCO2ClassDialog c = new ChangeCO2ClassDialog(co2dialog, _ctrl);
-				
-
 			}
 		});
 		//WEATHER BUTTON ________________________________________
@@ -110,7 +110,9 @@ public class ControlPanel extends JPanel implements TrafficSimObserver {
 		weatherButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				JFrame window = new JFrame();
-
+				_stopped = true;
+				turnUpButtons();
+				ChangeWeatherDialog w = new ChangeWeatherDialog(window, _ctrl);
 			}
 		});
 		//run BUTTON ____________________________________________
@@ -125,7 +127,6 @@ public class ControlPanel extends JPanel implements TrafficSimObserver {
 			try {
 				int steps = Integer.parseInt(ticksSpinner.getValue().toString());
 					run_sim(steps);	
-					turnUpButtons();
 			}
 				catch(NumberFormatException nfe) {
 					turnUpButtons();
@@ -141,7 +142,8 @@ public class ControlPanel extends JPanel implements TrafficSimObserver {
 		stopButton.setIcon(new ImageIcon("resources/icons/stop.png"));
 		stopButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				_stopped = false;
+				_stopped = true;
+				
 			}
 		});
 		//EXIT BUTTON ________________________________________
@@ -149,7 +151,7 @@ public class ControlPanel extends JPanel implements TrafficSimObserver {
 		exitButton.setAlignmentX(JButton.RIGHT_ALIGNMENT);
 		exitButton.setActionCommand("exit");
 		exitButton.setToolTipText("This will close the simulation");
-		exitButton.setIcon(new ImageIcon("resources/icon/exit.png"));
+		exitButton.setIcon(new ImageIcon("resources/icons/exit.png"));
 		exitButton.addActionListener(new ActionListener() {
 
 			public void actionPerformed(ActionEvent e) {
@@ -163,7 +165,7 @@ public class ControlPanel extends JPanel implements TrafficSimObserver {
 		});
 		//TICKS SPINNER BUTTON ________________________________________
 		this.ticksLabel = new JLabel("Ticks: ");
-		SpinnerNumberModel stepsSpinnerModel = new SpinnerNumberModel(0, 0, 1000000, 10);
+		SpinnerNumberModel stepsSpinnerModel = new SpinnerNumberModel(10, 0, 1000000, 10);
 		this.ticksSpinner = new JSpinner(stepsSpinnerModel);
 		this.ticksSpinner.setPreferredSize(new Dimension(65, 30)); // ESTA POR VER
 		this.ticksSpinner.setMaximumSize(new Dimension(65, 30));
@@ -185,21 +187,19 @@ public class ControlPanel extends JPanel implements TrafficSimObserver {
 	}
 
 	private void run_sim(int n) {
-		_stopped = false;
 		if (n > 0 && !_stopped) {
 			try {
 				_ctrl.run(1); 
 			} catch (Exception e) {
 				JOptionPane.showMessageDialog(this.toolBar, e.getMessage(), "Error in Simulator", JOptionPane.ERROR_MESSAGE);
+				turnUpButtons();
 				_stopped = true;
-				this.turnUpButtons();
 				return;
 			}
 			SwingUtilities.invokeLater(() -> run_sim(n - 1));
 		} else {
-			enableToolBar(true);
+			turnUpButtons();
 			_stopped = true;
-			this.turnUpButtons();
 		}
 	}
 

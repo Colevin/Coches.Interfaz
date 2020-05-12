@@ -56,7 +56,7 @@ public class Junction extends SimulatedObject {
 		if (y < 0)
 			throw new yJunNegException("The y has neg value");
 		else {
-			this.y = xCoor;
+			this.y = yCoor;
 		}
 		this.greenIndex = -1;
 		this.lastSwTime = 0;
@@ -167,7 +167,7 @@ public class Junction extends SimulatedObject {
 		return this.y;
 	}
 	public String displayQueue() {
-		String output = null;
+		String output = " ";
 		for(Road r :this.listIncRoad) {
 			int counter = 0;
 			output += r.getId() + ": [ " ;
@@ -177,10 +177,8 @@ public class Junction extends SimulatedObject {
 					output += v.getId() + ",";
 					counter++;
 				}
-				else {
-					output += v.getId() + "]";
-				}
 			}	
+				output += "] "; 
 		}
 		return output;
 	}
@@ -191,5 +189,11 @@ public class Junction extends SimulatedObject {
 
 	public List<Road> getInRoads() {
 		return this.listIncRoad;
+	}
+	public Map<Road, List<Vehicle>> getJunctionMap(){
+		return this.roadMap;
+	}
+	public List<Vehicle> whatQueue(Road r){
+		return this.roadMap.get(r);
 	}
 }

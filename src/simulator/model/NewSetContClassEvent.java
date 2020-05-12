@@ -28,7 +28,7 @@ public class NewSetContClassEvent extends Event{
 	public String toString() {
 		String stringReturned = null;
 		for(Pair<String,Integer> pair: cs) {
-		stringReturned =  "New ContClass '" + pair.getFirst() + " "+ pair.getSecond() + "'";
+			stringReturned =  "Change CO2 class: ['" + "(" + pair.getFirst().toString() + ", "+ pair.getSecond().toString() +")" + "]'";
 		}
 		return stringReturned;
 	}

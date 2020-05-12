@@ -24,6 +24,10 @@ public class SetWeatherEvent extends Event {
 		else throw new IllegalArgumentException("The contamination class is empty");
 	}
 	public String toString() {
-		return "New Weather '"+ ws +"'";
+		String stringReturned = null;
+		for(Pair<String,Weather> pair: ws) {
+		stringReturned =  "Change Weather: ['" + "(" + pair.getFirst().toString() + ", "+ pair.getSecond().toString() +")" + "]'";
+		}
+		return stringReturned;
 	}
 }

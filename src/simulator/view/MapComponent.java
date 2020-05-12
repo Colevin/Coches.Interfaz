@@ -142,7 +142,6 @@ public class MapComponent extends JPanel implements TrafficSimObserver {
 			// (x,y) are the coordinates of the junction
 			int x = j.getX();
 			int y = j.getY();
-
 			// draw a circle with center at (x,y) with radius _JRADIUS
 			g.setColor(_JUNCTION_COLOR);
 			g.fillOval(x - _JRADIUS / 2, y - _JRADIUS / 2, _JRADIUS, _JRADIUS);
@@ -164,8 +163,10 @@ public class MapComponent extends JPanel implements TrafficSimObserver {
 		}
 		maxW += 20;
 		maxH += 20;
-		setPreferredSize(new Dimension(maxW, maxH));
-		setSize(new Dimension(maxW, maxH));
+		if (maxW > getWidth() || maxH > getHeight()) {
+            setPreferredSize(new Dimension(maxW, maxH));
+            setSize(new Dimension(maxW, maxH));
+        }
 	}
 
 	// This method draws a line from (x1,y1) to (x2,y2) with an arrow.

@@ -11,6 +11,7 @@ import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
@@ -18,6 +19,8 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSpinner;
 import javax.swing.JTextArea;
+import javax.swing.SpinnerNumberModel;
+
 import simulator.control.Controller;
 import simulator.misc.Pair;
 import simulator.model.Event;
@@ -46,7 +49,11 @@ public class ChangeCO2ClassDialog extends JDialog{
 	private int whatTime;
 	private Event newEvent;
 	
+	
+	private DefaultComboBoxModel<String> listVehiclesModel;
 	private JComboBox<String> listVehicles;
+	
+
 	
 	private JComboBox<Integer> listCO;
 	private Integer Co2Pos[] = {0,1,2,3,4,5,6,7,8,9,10};
@@ -75,9 +82,11 @@ public class ChangeCO2ClassDialog extends JDialog{
 		
 		//Selectors part
 		
-		this.Vehicles = new JLabel("Vehicles: ");
-		this.listVehicles = new JComboBox<String>(vehiclesRoad); 
+		this.Vehicles = new JLabel("Vehicles: "); 
+		listVehiclesModel = new DefaultComboBoxModel<String>(vehiclesRoad);
+		listVehicles = new JComboBox<>(listVehiclesModel);
 		listVehicles.setSelectedIndex(0);
+		idVehicle = vehiclesRoad[0];
 		listVehicles.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				idVehicle = listVehicles.getSelectedItem().toString();
@@ -88,6 +97,7 @@ public class ChangeCO2ClassDialog extends JDialog{
 		this.CO2 = new JLabel("CO2 Class: ");
 		this.listCO = new JComboBox<Integer>(Co2Pos); 
 		listCO.setSelectedIndex(0);
+		newContClass = 0;
 		listCO.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				newContClass = Integer.valueOf(listCO.getSelectedItem().toString());	
@@ -98,7 +108,8 @@ public class ChangeCO2ClassDialog extends JDialog{
 		
 		//Ticks
 		this.ticks = new JLabel("Ticks: ");
-		this.tickSpin = new JSpinner();
+		SpinnerNumberModel tickSpinModel = new SpinnerNumberModel(0, 0, 10000, 1);
+		this.tickSpin = new JSpinner(tickSpinModel);
 		tickSpin.setPreferredSize(new Dimension(50,30));
 		tickSpin.setMaximumSize(new Dimension(50,30));
 		

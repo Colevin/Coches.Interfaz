@@ -115,5 +115,7 @@ public abstract class Road extends SimulatedObject {
 	public double getLength() {
 		return this.length;
 	}
-
+	public List<Vehicle> getListVehicleRoad(){
+		return this.vehicles;
+	}
 }

@@ -2,6 +2,7 @@ package simulator.view;
 
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
@@ -36,13 +37,13 @@ public class MapByRoadComponent extends JComponent implements TrafficSimObserver
 	Color _BG_COLOR = Color.WHITE;
 	private RoadMap _map;
 	private Image _car;
-	//el clima
+	// el clima
 	private Image sunny;
 	private Image storm;
 	private Image cloud;
 	private Image rain;
 	private Image wind;
-	//las caritas
+	// las caritas
 	private Image cont0;
 	private Image cont1;
 	private Image cont2;
@@ -57,12 +58,12 @@ public class MapByRoadComponent extends JComponent implements TrafficSimObserver
 	}
 
 	private void initGUI() {
-		_car = loadImage("car_front.png");
+		_car = loadImage("car.png");
 		sunny = loadImage("sun.png");
 		storm = loadImage("storm.png");
 		cloud = loadImage("cloud.png");
 		rain = loadImage("rain.png");
-		wind = loadImage("winid.png");
+		wind = loadImage("wind.png");
 		cont0 = loadImage("cont_0.png");
 		cont1 = loadImage("cont_1.png");
 		cont2 = loadImage("cont_2.png");
@@ -106,107 +107,112 @@ public class MapByRoadComponent extends JComponent implements TrafficSimObserver
 	private void drawRoads(Graphics2D g) {
 		int i = 0;
 		for (Road r : _map.getRoads()) {
-			
+
 			int x1 = 50;
-			int y = (i+1)*50;
-			int x2 = getWidth()-100;
+			int y = (i + 1) * 50;
+			int x2 = getWidth() - 100;
 			int B = r.roadLenght();
-			g.drawString(r.getId(), x1-20, y);
+			g.setColor(Color.BLACK);
+			g.drawString(r.getId(), x1 - 20, y);
+			g.setColor(Color.BLACK);
 			g.drawLine(x1, y, x2, y);
-			//llamada a dibujar la junction
-			drawJunctions(g, x1, y, x2);
-			//llamada a dibujar los coches
-			drawVehicles(g, x1, y, x2, B);
-			//calcular el clima
+			// llamada a dibujar la junction
+			drawJunctions(g, r, x1, y, x2);
+			// llamada a dibujar los coches
+			drawVehicles(g, r, x1, y, x2, B);
+			// calcular el clima
 			switch (r.getWeather()) {
 			case SUNNY:
-				g.drawImage(sunny, x2+20, y , 32, 32, this);
+				g.drawImage(sunny, x2 + 20, y - 18, 32, 32, this);
 				break;
-				
+
 			case STORM:
-				g.drawImage(storm, x2+20, y , 32, 32, this);
+				g.drawImage(storm, x2 + 20, y - 18, 32, 32, this);
 				break;
-				
+
 			case RAINY:
-				g.drawImage(rain, x2+20, y , 32, 32, this);
+				g.drawImage(rain, x2 + 20, y - 18, 32, 32, this);
 				break;
-				
+
 			case CLOUDY:
-				g.drawImage(cloud, x2+20, y , 32, 32, this);
+				g.drawImage(cloud, x2 + 20, y - 18, 32, 32, this);
 				break;
 			case WINDY:
-				g.drawImage(wind, x2+20, y , 32, 32, this);
+				g.drawImage(wind, x2 + 20, y - 18, 32, 32, this);
 				break;
+			}
+			// calcular la contaminacioon
+			int C = (int) Math
+					.floor(Math.min((double) r.getTotalCO2() / (1.0 + (double) r.getContLimit()), 1.0) / 0.19);
+			switch (C) {
+			case 0:
+				g.drawImage(cont0, x2 + 60, y - 18, 32, 32, this);
+				break;
+
+			case 1:
+				g.drawImage(cont1, x2 + 60, y - 18, 32, 32, this);
+				break;
+			case 2:
+				g.drawImage(cont2, x2 + 60, y - 18, 32, 32, this);
+				break;
+			case 3:
+				g.drawImage(cont3, x2 + 60, y - 18, 32, 32, this);
+				break;
+			case 4:
+				g.drawImage(cont4, x2 + 60, y - 18, 32, 32, this);
+				break;
+			case 5:
+				g.drawImage(cont5, x2 + 60, y - 18, 32, 32, this);
+				break;
+			}
+			i++;
+		}
+
+	}
+
+	private void drawJunctions(Graphics2D g, Road r, int x1, int y, int x2) {
+		Color _JUNCTION_COLOR;
+
+		// draw a circle with center at (x,y) with radius _JRADIUS
+		g.setColor(_BLUE_LIGHT_COLOR);
+		g.fillOval(x1 - _JRADIUS / 2, y - _JRADIUS / 2, _JRADIUS, _JRADIUS);
+		// draw the circle at the end of the road
+		if (r.getDest().getGreenLightIndex() == 1) {
+			_JUNCTION_COLOR = _GREEN_LIGHT_COLOR;
+		} else {
+			_JUNCTION_COLOR = _RED_LIGHT_COLOR;
+		}
+		g.setColor(Color.RED);
+		g.drawString(r.getSrc().getId(), x1 - _JRADIUS / 2, y - 10);
+		g.drawString(r.getDest().getId(), x2 - _JRADIUS / 2, y - 10);
+
+		g.setColor(_JUNCTION_COLOR);
+		g.fillOval(x2 - _JRADIUS / 2, y - _JRADIUS / 2, _JRADIUS, _JRADIUS);
+
+		// draw the junction's identifier at (x,y).
+
+	}
+
+	private void drawVehicles(Graphics2D g, Road r, int x1, int y, int x2, int B) {
+		for (Vehicle v : r.getListVehicleRoad()) {
+				if (v.getStatus() != VehicleStatus.ARRIVED) {
+					int x = 0;
+					x = x1 + (int) ((x2 - x1) * ((double) v.getLocation() / (double) B));
+
+					g.drawImage(_car, x, y -10, 16, 16, this);
+					g.drawString(v.getId(), x, y - 6);
 				}
-			//calcular la contaminacioon
-		int C =  (int) Math.floor(Math.min((double)r.getTotalCO2()/(1.0 + (double)r.getContLimit()),1.0) / 0.19);
-		switch (C) {
-		case 0:
-			g.drawImage(cont0, x2+60, y , 32, 32, this);
-			break;
-			
-		case 1:
-			g.drawImage(cont1, x2+60, y , 32, 32, this);
-			break;
-		case 2:
-			g.drawImage(cont2, x2+60, y , 32, 32, this);
-			break;
-		case 3:
-			g.drawImage(cont3, x2+60, y , 32, 32, this);
-			break;
-		case 4:
-			g.drawImage(cont4, x2+60, y , 32, 32, this);
-			break;
-		case 5:
-			g.drawImage(cont5, x2+60, y , 32, 32, this);
-			break;
-			}
-		i++;		
-			}
-			
-		}
-
-	private void drawJunctions(Graphics2D g, int x1, int y, int x2) {
-		for (Junction j : _map.getJunctions()) {
-			Color _JUNCTION_COLOR;
-
-			// draw a circle with center at (x,y) with radius _JRADIUS
-			g.setColor(_BLUE_LIGHT_COLOR);
-			g.fillOval(x1 - _JRADIUS / 2, y - _JRADIUS / 2, _JRADIUS, _JRADIUS);
-			// draw the circle at the end of the road
-			if (j.getGreenLightIndex() == 1) {
-				_JUNCTION_COLOR = _GREEN_LIGHT_COLOR;
-			} else {
-				_JUNCTION_COLOR = _RED_LIGHT_COLOR;
-			}
-			g.setColor(_JUNCTION_COLOR);
-			g.fillOval(x2 - _JRADIUS / 2, y - _JRADIUS / 2, _JRADIUS, _JRADIUS);
-			// draw the junction's identifier at (x,y)
-			g.setColor(_JUNCTION_COLOR);
-			g.drawString(j.getId(), x1, y);
-			g.setColor(_JUNCTION_COLOR);
-			g.drawString(j.getId(), x2, y);
-		}
-	}
-
-	private void drawVehicles(Graphics2D g, int x1, int y, int x2, int B) {
-		for (Vehicle v : _map.getVehicles()) {
-			if (v.getStatus() != VehicleStatus.ARRIVED) {
-				int x = 0;
-				x = x1 + (int) ((x2 - x1) * ((double) v.getLocation() / (double) B));
-
-				g.drawImage(_car, x, y - 6, 16, 16, this);
-				g.drawString(v.getId(), x, y - 6);
 			}
 		}
-	}
 
 	private void updatePrefferedSize() {
 	}
+
 	public void update(RoadMap map) {
 		_map = map;
 		repaint();
 	}
+
 	public void onAdvanceStart(RoadMap map, List<Event> events, int time) {
 	}
 
